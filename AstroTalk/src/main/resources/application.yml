@@ -1,0 +1,14 @@
+
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/astro
+    username: root
+    password: root
+
+server:
+  port: 8081
+
+#spring.security.user.name=prathiksha
+#spring.security.user.password=prathiksha
