@@ -14,4 +14,6 @@ public List<Users> findAll() ;
 public Users findByUsernameAndPassword(String username, String password);
 public Users findById(int id);
 public Users findByEmail(String email);
+
+public void deleteById(int id);
 }

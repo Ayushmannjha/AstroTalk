@@ -11,6 +11,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,7 +27,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.JWTAuthenticationSpringboot.entities.AstroAdmin;
 import com.example.JWTAuthenticationSpringboot.entities.Users;
+import com.example.JWTAuthenticationSpringboot.models.AdminRegistrationRequest;
+import com.example.JWTAuthenticationSpringboot.models.AdminRegistrationResponse;
 import com.example.JWTAuthenticationSpringboot.models.ErrorResponse;
 import com.example.JWTAuthenticationSpringboot.models.LoginAdminResponse;
 import com.example.JWTAuthenticationSpringboot.models.LoginRequest;
@@ -61,7 +65,7 @@ public class AuthController {
 
 
     
-    @PostMapping("/register") 
+    @PostMapping("/register-user") 
     public ResponseEntity<Object> register(@RequestBody RegistrationRequest request) {
     	
     	Users newUser = new Users();
@@ -119,6 +123,51 @@ public class AuthController {
     	return new ResponseEntity<>(response, HttpStatus.OK);
     }
    
+    @PostMapping("/register-admin")
+    public ResponseEntity<Object> registerAdmin(@RequestBody AdminRegistrationRequest request){
+    	AstroAdmin newAdmin = new AstroAdmin();
+    	BeanUtils.copyProperties(request, newAdmin);
+    	try {
+     	   astroService.insertAdmin(newAdmin);
+		} catch (DataIntegrityViolationException  e) {
+			
+			if (e.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
+	            
+				ErrorResponse er = new ErrorResponse();
+				er.setSuccess(false);
+				er.setMessage("Admin Already exits");
+				return new ResponseEntity<>(er, HttpStatus.OK);
+				
+	        }
+			ErrorResponse er = new ErrorResponse();
+			er.setSuccess(false);
+			er.setMessage("Internal error");
+			return new ResponseEntity<>(er, HttpStatus.OK);
+		}
+    	UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(newAdmin.getUsername())
+                .password(passwordEncoder.encode(newAdmin.getPassword()))  // Ensure the password is encoded
+                .roles("ADMIN")  // Modify roles as needed
+                .build();
+        ((InMemoryUserDetailsManager) userDetailsService).createUser(userDetails);
+        System.out.println(userDetails+" username=  "+newAdmin.getUsername()+" password = "+newAdmin.getPassword());
+        doAuthenticate(newAdmin.getUsername(),newAdmin.getPassword());
+        String token = helper.generateToken(userDetails);
+    	AdminRegistrationResponse response = new AdminRegistrationResponse();
+    	response.setUsername(newAdmin.getUsername());
+    	response.setSuccess(true);
+    	response.setEmail(newAdmin.getEmail());
+    	response.setPassword(newAdmin.getPassword());
+    	response.setPhone(newAdmin.getPhone());
+    	response.setGender(newAdmin.getGender());
+    	response.setToken(token);
+    	return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+    
+    
+    
+    
+    
+    
     
     public boolean verifyZodiacSign(LocalDate birthDate, String providedZodiacSign) {
         String calculatedZodiacSign = determineZodiacSign(birthDate);

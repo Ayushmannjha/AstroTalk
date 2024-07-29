@@ -21,7 +21,7 @@ import com.example.JWTAuthenticationSpringboot.service.AstroService;
 
 @RestController
 @RequestMapping("/user")
-public class HomeController {
+public class UserController {
     @Autowired
 	private AstroService sr;
 
@@ -60,7 +60,7 @@ public class HomeController {
             user.setName(request.getName());
             user.setGender(request.getGender());
             user.setPhone(request.getPhone());
-            user.setEmail(request.getEmail());
+            
             user.setDob(request.getDob());
             user.setPassword(request.getPassword());
             user.setZodiacSign(request.getZodiacSign());
@@ -69,7 +69,7 @@ public class HomeController {
             
             UpdateResponse response = new UpdateResponse();
             response.setId(user.getId());
-            response.setMessage("profile updated succesfullt");
+            response.setMessage("profile updated succesfully");
             response.setSuccess(true);
             return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {

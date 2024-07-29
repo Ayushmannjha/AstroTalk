@@ -3,25 +3,44 @@ package com.example.JWTAuthenticationSpringboot.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.JWTAuthenticationSpringboot.entities.AstroAdmin;
 import com.example.JWTAuthenticationSpringboot.entities.Users;
+import com.example.JWTAuthenticationSpringboot.repo.AstroAdminRepo;
 import com.example.JWTAuthenticationSpringboot.repo.UserRepo;
 
 
 
 @Service
 public class AstroService {
+
 @Autowired	
 private UserRepo repo;
+@Autowired
+private AstroAdminRepo admin_repo;
+
+@Transactional(readOnly = false)
+public AstroAdmin insertAdmin(AstroAdmin admin) {
+return admin_repo.save(admin);	
+}
+
+
+
+
 @Transactional(readOnly = false)
 public Users insert(Users user) {
 	user.setUsername(generateUsername(user.getName(),user.getPhone()));
 	user.setWallet(1000);
 	return repo.save(user);
 }
+@Transactional(readOnly = false)
+public void deleteUserById(int id) {
+	repo.deleteById(id);
+}
+
+
 
 public List<Users> getAll(){
 return repo.findAll();
