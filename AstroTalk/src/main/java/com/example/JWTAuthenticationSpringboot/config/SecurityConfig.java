@@ -25,9 +25,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 	            		 .requestMatchers("/auth/register-user").permitAll() // Allow unauthenticated access to registration endpoint
 	            		 .requestMatchers("/auth/register-admin").permitAll()
+	            		 .requestMatchers("/auth/register-astro").permitAll()
 	            		 .requestMatchers("/auth/login").permitAll() // Allow unauthenticated access to login endpoint
 	                     .requestMatchers("/admin/**").hasRole("ADMIN") // Restrict access to admin routes to ADMIN role
-	                     .requestMatchers("/user/**").hasRole("USER") // Restrict access to user routes to USER role
+	                     .requestMatchers("/user/**").hasRole("USER")
+	                     .requestMatchers("/astro/**").hasRole("ASTRO")// Restrict access to user routes to USER role
 	                     .anyRequest().authenticated()  // All other routes require authentication
 	            )
                         .exceptionHandling(ex->ex.authenticationEntryPoint(point))

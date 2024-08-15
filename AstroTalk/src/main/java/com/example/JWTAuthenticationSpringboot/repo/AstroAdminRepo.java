@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.example.JWTAuthenticationSpringboot.entities.AstroAdmin;
 @Repository
 public interface AstroAdminRepo extends JpaRepository<AstroAdmin, Integer>{
-
+AstroAdmin findByEmailAndPassword(String email, String password);
 public List<AstroAdmin> findAll();
+
+
 }

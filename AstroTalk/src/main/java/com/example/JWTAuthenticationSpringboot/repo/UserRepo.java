@@ -11,7 +11,7 @@ import com.example.JWTAuthenticationSpringboot.entities.Users;
 
 public interface UserRepo extends JpaRepository<Users, Integer>{
 public List<Users> findAll() ;
-public Users findByUsernameAndPassword(String username, String password);
+public Users findByEmailAndPassword(String email, String password);
 public Users findById(int id);
 public Users findByEmail(String email);
 

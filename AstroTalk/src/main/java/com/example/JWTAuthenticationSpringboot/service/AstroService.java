@@ -1,14 +1,19 @@
 package com.example.JWTAuthenticationSpringboot.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.JWTAuthenticationSpringboot.entities.Astro;
 import com.example.JWTAuthenticationSpringboot.entities.AstroAdmin;
+import com.example.JWTAuthenticationSpringboot.entities.Transaction;
 import com.example.JWTAuthenticationSpringboot.entities.Users;
 import com.example.JWTAuthenticationSpringboot.repo.AstroAdminRepo;
+import com.example.JWTAuthenticationSpringboot.repo.AstroRepo;
+import com.example.JWTAuthenticationSpringboot.repo.TransactionRepo;
 import com.example.JWTAuthenticationSpringboot.repo.UserRepo;
 
 
@@ -20,12 +25,38 @@ public class AstroService {
 private UserRepo repo;
 @Autowired
 private AstroAdminRepo admin_repo;
+@Autowired
+private AstroRepo astro_repo;
+@Autowired
+private TransactionRepo tx_repo;
+
+
+public Optional<Transaction> getTxById(String id){
+	return tx_repo.findById(id);
+}
+
+@Transactional(readOnly = false)
+public Transaction saveTx(Transaction tr) {
+	return tx_repo.save(tr);
+}
+
+public Astro getAstroById(int id) {
+	return astro_repo.findById(id);
+}
+
+public List<Astro> getAllAstro(){
+	return astro_repo.findAll();
+}
+
 
 @Transactional(readOnly = false)
 public AstroAdmin insertAdmin(AstroAdmin admin) {
 return admin_repo.save(admin);	
 }
-
+@Transactional(readOnly = false)
+public Astro saveAstro(Astro astro) {
+	return astro_repo.save(astro);
+}
 
 
 
@@ -47,9 +78,17 @@ return repo.findAll();
 }
 
 
-public Users getByUsernameAndPassword(String username, String password) {
-	return repo.findByUsernameAndPassword(username, password);
+public Users getUserByEmailAndPassword(String email, String password) {
+	return repo.findByEmailAndPassword(email, password);
 }
+
+public AstroAdmin getAdminByEmailAndPassword(String email, String password) {
+	return admin_repo.findByEmailAndPassword(email, password);
+}
+public Astro getAstroByEmailAndPassword(String email, String password) {
+	return astro_repo.findByEmailAndPassword(email, password);
+}
+
 public Users getById(int id){
 	return  repo.findById(id);
 }
@@ -87,6 +126,8 @@ private static String getPhoneSuffix(String phoneNumber) {
         return phoneNumber;
     }
 }
+
+
 
 
 

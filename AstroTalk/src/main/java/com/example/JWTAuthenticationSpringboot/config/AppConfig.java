@@ -30,12 +30,8 @@ public class AppConfig {
     @Bean
     public UserDetailsService userDetailsService(){
 
-    	 UserDetails userDetails = User.withUsername("ayush")
-                 .password(passwordEncoder().encode("ayush"))
-                 .roles("ADMIN") // Assuming all users have the "USER" role; modify as needed
-                 .build();
 
-        return new InMemoryUserDetailsManager(userDetails);
+        return new InMemoryUserDetailsManager();
     }
 
     @Bean

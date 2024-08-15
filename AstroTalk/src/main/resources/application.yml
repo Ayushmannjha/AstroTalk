@@ -1,14 +1,16 @@
-
-
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/astro
+    url: jdbc:mysql://localhost:3306/astro  # Add timezone if necessary
     username: root
     password: root
-
+  jpa:
+    hibernate:
+      ddl-auto: update  # This specifies schema generation action
+      show-sql: true    # Enables SQL output to console
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect  # Ensure this matches your MySQL version
+        format_sql: true  # Pretty-print SQL in logs
 server:
-  port: 8081
-
-#spring.security.user.name=prathiksha
-#spring.security.user.password=prathiksha
+  port: 8070

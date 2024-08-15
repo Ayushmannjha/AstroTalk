@@ -3,6 +3,14 @@ package com.example.JWTAuthenticationSpringboot.models;
 
 public class LoginUserResponse {
 	private boolean success;
+	private String name;
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 	private String email;
 	private double wallet;
     public boolean getSuccess() {

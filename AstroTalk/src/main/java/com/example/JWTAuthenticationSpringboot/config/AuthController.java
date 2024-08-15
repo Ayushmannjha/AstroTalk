@@ -11,7 +11,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,12 +26,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.JWTAuthenticationSpringboot.entities.Astro;
 import com.example.JWTAuthenticationSpringboot.entities.AstroAdmin;
 import com.example.JWTAuthenticationSpringboot.entities.Users;
 import com.example.JWTAuthenticationSpringboot.models.AdminRegistrationRequest;
 import com.example.JWTAuthenticationSpringboot.models.AdminRegistrationResponse;
+import com.example.JWTAuthenticationSpringboot.models.AstroRegistration;
+import com.example.JWTAuthenticationSpringboot.models.AstroResponse;
 import com.example.JWTAuthenticationSpringboot.models.ErrorResponse;
 import com.example.JWTAuthenticationSpringboot.models.LoginAdminResponse;
+import com.example.JWTAuthenticationSpringboot.models.LoginAstroResponse;
 import com.example.JWTAuthenticationSpringboot.models.LoginRequest;
 import com.example.JWTAuthenticationSpringboot.models.LoginUserResponse;
 import com.example.JWTAuthenticationSpringboot.models.RegistrationRequest;
@@ -64,6 +67,8 @@ public class AuthController {
     private Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 
+//-----------------User registration starts-------------------------------//
+    
     
     @PostMapping("/register-user") 
     public ResponseEntity<Object> register(@RequestBody RegistrationRequest request) {
@@ -99,14 +104,14 @@ public class AuthController {
         
         
        
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(newUser.getUsername())
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(newUser.getEmail())
                 .password(passwordEncoder.encode(newUser.getPassword()))  // Ensure the password is encoded
                 .roles("USER")  // Modify roles as needed
                 .build();
         ((InMemoryUserDetailsManager) userDetailsService).createUser(userDetails);
       
-        System.out.println(userDetails+" username=  "+newUser.getUsername()+" password = "+newUser.getPassword());
-        doAuthenticate(newUser.getUsername(),newUser.getPassword());
+       // System.out.println(userDetails+" username=  "+newUser.getUsername()+" password = "+newUser.getPassword());
+        doAuthenticate(newUser.getEmail(),newUser.getPassword());
         String token = helper.generateToken(userDetails);
         RegistrationResponse response = new RegistrationResponse();
         response.setToken(token);
@@ -123,6 +128,13 @@ public class AuthController {
     	return new ResponseEntity<>(response, HttpStatus.OK);
     }
    
+    
+  //-----------------User registration ends-------------------------------//
+    
+    
+    
+    
+  //-----------------Admin registration starts-------------------------------//
     @PostMapping("/register-admin")
     public ResponseEntity<Object> registerAdmin(@RequestBody AdminRegistrationRequest request){
     	AstroAdmin newAdmin = new AstroAdmin();
@@ -144,31 +156,72 @@ public class AuthController {
 			er.setMessage("Internal error");
 			return new ResponseEntity<>(er, HttpStatus.OK);
 		}
-    	UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(newAdmin.getUsername())
+    	UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(newAdmin.getEmail())
                 .password(passwordEncoder.encode(newAdmin.getPassword()))  // Ensure the password is encoded
                 .roles("ADMIN")  // Modify roles as needed
                 .build();
         ((InMemoryUserDetailsManager) userDetailsService).createUser(userDetails);
-        System.out.println(userDetails+" username=  "+newAdmin.getUsername()+" password = "+newAdmin.getPassword());
-        doAuthenticate(newAdmin.getUsername(),newAdmin.getPassword());
+      //  System.out.println(userDetails+" username=  "+newAdmin.getUsername()+" password = "+newAdmin.getPassword());
+        doAuthenticate(newAdmin.getEmail(),newAdmin.getPassword());
         String token = helper.generateToken(userDetails);
     	AdminRegistrationResponse response = new AdminRegistrationResponse();
-    	response.setUsername(newAdmin.getUsername());
     	response.setSuccess(true);
-    	response.setEmail(newAdmin.getEmail());
-    	response.setPassword(newAdmin.getPassword());
-    	response.setPhone(newAdmin.getPhone());
-    	response.setGender(newAdmin.getGender());
-    	response.setToken(token);
+        response.setToken(token);
+        BeanUtils.copyProperties(newAdmin, response);
     	return new ResponseEntity<>(response,HttpStatus.OK);
     }
     
     
+  //-----------------User registration ends-------------------------------//
+    
+
+    
+    
+  //-----------------Astro registration starts-------------------------------//  
+    @PostMapping("/register-astro")
+    public ResponseEntity<Object> registerAstro(@RequestBody AstroRegistration request){
+    	Astro newAstro = new Astro();
+    	BeanUtils.copyProperties(request, newAstro);
+    	try {
+     	  Astro s =  astroService.saveAstro(newAstro);
+     	  System.out.println(s);
+		} catch (DataIntegrityViolationException  e) {
+			
+			if (e.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
+	            
+				ErrorResponse er = new ErrorResponse();
+				er.setSuccess(false);
+				er.setMessage("Astro Already exits");
+				return new ResponseEntity<>(er, HttpStatus.OK);
+				
+	        }
+			ErrorResponse er = new ErrorResponse();
+			er.setSuccess(false);
+			er.setMessage("Internal error");
+			return new ResponseEntity<>(er, HttpStatus.OK);
+		}
+    	UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(newAstro.getEmail())
+                .password(passwordEncoder.encode(newAstro.getPassword()))  // Ensure the password is encoded
+                .roles("ASTRO")  // Modify roles as needed
+                .build();
+        ((InMemoryUserDetailsManager) userDetailsService).createUser(userDetails);
+       // System.out.println(userDetails+" username=  "+newAstro.getUsername()+" password = "+newAstro.getPassword());
+        doAuthenticate(newAstro.getEmail(),newAstro.getPassword());
+        String token = helper.generateToken(userDetails);
+        AstroResponse response = new AstroResponse();
+        response.setSuccess(true);
+        response.setToken(token);
+        BeanUtils.copyProperties(newAstro, response);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    	
+    }
+    
+    
+  //-----------------Astro registration starts-------------------------------//
     
     
     
-    
-    
+    /////----------utility methods-----------------///
     public boolean verifyZodiacSign(LocalDate birthDate, String providedZodiacSign) {
         String calculatedZodiacSign = determineZodiacSign(birthDate);
         return calculatedZodiacSign.equalsIgnoreCase(providedZodiacSign);
@@ -199,26 +252,33 @@ public class AuthController {
 
     
     
+ //-----------------login starts--------------------------//
+    //--single login for every role automatically find who is logging in--//////////
+   
     
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
     	
-        this.doAuthenticate(request.getUsername(), request.getPassword());
+        this.doAuthenticate(request.getEmail(), request.getPassword());
 
-        Users user = astroService.getByUsernameAndPassword(request.getUsername(), request.getPassword());
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
      // Iterate through the authorities and print the roles
         boolean isAdmin = false;
         boolean isUser = false;
+        boolean isAstro = false;
 
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
+            //logic of checking role//
             if ("ROLE_ADMIN".equals(role)) {
                 isAdmin = true;
             } else if ("ROLE_USER".equals(role)) {
                 isUser = true;
+            }
+            else if("ROLE_ASTRO".equals(role)) {
+            	isAstro = true;
             }
         }
 
@@ -227,21 +287,37 @@ public class AuthController {
         String token = this.helper.generateToken(userDetails);
         if(isAdmin) {
         	LoginAdminResponse adminResponse = new LoginAdminResponse();
+        	AstroAdmin admin = astroService.getAdminByEmailAndPassword(request.getEmail(), request.getPassword());
+            
         	adminResponse.setSuccess(true);
-        	adminResponse.setEmail("adminDatabaseNotPrepared");
+        	adminResponse.setEmail(admin.getEmail());
         	adminResponse.setRole("Admin");
         	adminResponse.setToken(token);
-        	adminResponse.setUsername(request.getUsername());
+        	adminResponse.setUsername(admin.getUsername());
         	
         	return new ResponseEntity<>(adminResponse, HttpStatus.OK);
         }
         else if(isUser) {
         	 LoginUserResponse response = new LoginUserResponse();
+        	 Users user = astroService.getUserByEmailAndPassword(request.getEmail(), request.getPassword());
+             
              response.setSuccess(true);
              response.setJwtToken(token);
-             response.setUsername(userDetails.getUsername());
+             response.setUsername(user.getUsername());
+             response.setName(user.getName());
              response.setEmail(user.getEmail());
              return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        else if(isAstro) {
+        	LoginAstroResponse response = new LoginAstroResponse();
+        	Astro astro = astroService.getAstroByEmailAndPassword(request.getEmail(), request.getPassword());
+            
+            response.setSucces(true);
+            response.setToken(token);
+            response.setUsername(astro.getUsername());
+            response.setRole("Astrologer");
+            response.setEmail(astro.getEmail());
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         else {
         	ErrorResponse er = new ErrorResponse();
@@ -251,10 +327,13 @@ public class AuthController {
         }
        
     }
+    
+    
+    //------------login ends------------------//
 
-    private void doAuthenticate(String username, String password) {
+    private void doAuthenticate(String email, String password) {
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(username, password);
+                new UsernamePasswordAuthenticationToken(email, password);
         try {
             manager.authenticate(authentication);
         } catch (BadCredentialsException e) {
